@@ -13,7 +13,7 @@ const MODEL_NAME = 'gemini-3-pro-image-preview';
 //
 // Exemplo: const API_KEY = "AIzaSyD-sua-chave-aqui...";
 // ============================================================================
-const API_KEY = 'AIzaSyB6poZ_TKzt3USPIX48wICRv42e3XEJrp8';
+const API_KEY = "AIzaSyB6poZ_TKzt3USPIX48wICRv42e3XEJrp8";
 
 // Função auxiliar para limpar o prefixo data:image/...;base64, se existir
 function cleanBase64(data: string): string {
