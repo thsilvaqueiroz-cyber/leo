@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { AspectRatio } from "../types";
 
@@ -13,6 +12,8 @@ function cleanBase64(data: string): string {
 }
 
 export async function generateImage(prompt: string, aspectRatio: AspectRatio, referenceImage?: string | null): Promise<{url: string, base64: string}> {
+  // Use process.env.API_KEY directly as per guidelines. 
+  // Assume it is pre-configured and valid.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const parts: any[] = [];
@@ -22,7 +23,7 @@ export async function generateImage(prompt: string, aspectRatio: AspectRatio, re
     parts.push({
       inlineData: {
         data: cleanBase64(referenceImage),
-        mimeType: 'image/png' // A API aceita PNG/JPEG, definimos genérico aqui ou poderíamos detectar
+        mimeType: 'image/png'
       }
     });
   }
@@ -62,14 +63,13 @@ export async function generateImage(prompt: string, aspectRatio: AspectRatio, re
     
     return { url, base64 };
   } catch (error: any) {
-    if (error?.message?.includes("Requested entity was not found")) {
-      throw new Error("AUTH_REQUIRED");
-    }
+    console.error("Gemini API Error:", error);
     throw error;
   }
 }
 
 export async function editImage(originalBase64: string, editPrompt: string, aspectRatio: AspectRatio): Promise<{url: string, base64: string}> {
+  // Use process.env.API_KEY directly as per guidelines.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   try {
@@ -109,9 +109,7 @@ export async function editImage(originalBase64: string, editPrompt: string, aspe
     
     return { url, base64 };
   } catch (error: any) {
-    if (error?.message?.includes("Requested entity was not found")) {
-      throw new Error("AUTH_REQUIRED");
-    }
+    console.error("Gemini API Error:", error);
     throw error;
   }
 }

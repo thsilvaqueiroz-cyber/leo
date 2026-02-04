@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { AppState, GeneratedImage, AspectRatio } from './types';
 import { generateImage } from './services/geminiService';
 import { ImageCard } from './components/ImageCard';
@@ -9,33 +9,10 @@ const App: React.FC = () => {
     selectedRatio: '1:1',
     images: [],
     isGeneratingAll: false,
-    apiKeySelected: false,
     referenceImage: null
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const checkApiKey = useCallback(async () => {
-    try {
-      const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-      setState(prev => ({ ...prev, apiKeySelected: hasKey }));
-    } catch (e) {
-      console.error("Erro ao verificar chave:", e);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkApiKey();
-  }, [checkApiKey]);
-
-  const handleOpenSelectKey = async () => {
-    try {
-      await (window as any).aistudio.openSelectKey();
-      setState(prev => ({ ...prev, apiKeySelected: true }));
-    } catch (e) {
-      console.error("Erro ao abrir seletor:", e);
-    }
-  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,7 +48,6 @@ const App: React.FC = () => {
 
     const generationTasks = [0, 1, 2].map(async (i) => {
       try {
-        // Passamos a imagem de referência aqui
         const result = await generateImage(state.mainPrompt, state.selectedRatio, state.referenceImage);
         return {
           id: `img-${Date.now()}-${i}`,
@@ -82,9 +58,7 @@ const App: React.FC = () => {
           aspectRatio: state.selectedRatio
         } as GeneratedImage;
       } catch (error: any) {
-        if (error.message === "AUTH_REQUIRED") {
-          setState(p => ({ ...p, apiKeySelected: false }));
-        }
+        console.error("Erro na geração:", error);
         return {
           id: `error-${i}`,
           url: '',
@@ -111,35 +85,6 @@ const App: React.FC = () => {
       images: prev.images.map(img => img.id === updated.id ? updated : img)
     }));
   };
-
-  if (!state.apiKeySelected) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-10 text-center border border-slate-100 transform transition-all">
-          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">Ative o Gemini Pro</h1>
-          <p className="text-slate-500 mb-10 leading-relaxed font-medium">
-            O modelo <strong>Nano Banana Pro</strong> exige uma chave de API paga do Google Cloud. Selecione o seu projeto para começar.
-          </p>
-          <button
-            onClick={handleOpenSelectKey}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-xl shadow-blue-200 hover:shadow-blue-300 active:scale-95 text-lg"
-          >
-            Selecionar Chave de API
-          </button>
-          <div className="mt-8 flex flex-col gap-2">
-            <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors">
-              Como configurar o faturamento?
-            </a>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#fcfdfe] pb-24 font-['Inter']">
@@ -272,7 +217,7 @@ const App: React.FC = () => {
                   key={image.id} 
                   image={image} 
                   onUpdate={handleUpdateImage}
-                  onResetKey={() => setState(p => ({ ...p, apiKeySelected: false }))}
+                  onResetKey={() => {}}
                 />
               ))}
             </div>

@@ -1,4 +1,3 @@
-
 export type AspectRatio = "1:1" | "16:9" | "9:16" | "4:3" | "3:4";
 
 export interface GeneratedImage {
@@ -16,6 +15,5 @@ export interface AppState {
   selectedRatio: AspectRatio;
   images: GeneratedImage[];
   isGeneratingAll: boolean;
-  apiKeySelected: boolean;
   referenceImage: string | null; // Data URL da imagem de referência
 }
