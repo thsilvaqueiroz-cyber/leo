@@ -87,6 +87,7 @@ export async function editImage(originalBase64: string, editPrompt: string, aspe
     throw new Error("Chave de API não configurada. Verifique o arquivo services/geminiService.ts");
   }
 
+  // CORREÇÃO AQUI: Usando a constante API_KEY em vez da string repetida
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   
   try {
