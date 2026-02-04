@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GeneratedImage } from '../types';
 import { editImage } from '../services/geminiService';
@@ -33,6 +32,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ image, onUpdate, onResetKe
         onResetKey();
       }
       console.error("Erro ao refinar:", error);
+      alert("Erro ao editar imagem: " + (error.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
@@ -45,6 +45,27 @@ export const ImageCard: React.FC<ImageCardProps> = ({ image, onUpdate, onResetKe
         <div className="p-5 flex-1 space-y-3">
           <div className="h-4 w-3/4 bg-slate-100 rounded animate-shimmer" />
           <div className="h-4 w-1/2 bg-slate-100 rounded animate-shimmer" />
+        </div>
+      </div>
+    );
+  }
+
+  if (image.status === 'error') {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-red-100 flex flex-col h-[480px] p-8 items-center justify-center text-center gap-6">
+        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-500">
+          <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-slate-900 mb-2">Falha na criação</h3>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            {image.errorMessage || "Não foi possível gerar a imagem. Verifique sua chave de API ou tente um prompt diferente."}
+          </p>
+        </div>
+        <div className="text-xs text-slate-400 bg-slate-50 p-3 rounded-lg w-full break-all font-mono">
+           Status: {image.status}
         </div>
       </div>
     );

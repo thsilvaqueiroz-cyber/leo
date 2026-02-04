@@ -23,6 +23,15 @@ function cleanBase64(data: string): string {
   return data;
 }
 
+// Função para extrair o MimeType correto da string base64
+function getMimeType(data: string): string {
+  const match = data.match(/^data:(.*);base64,/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return 'image/png'; // Fallback
+}
+
 export async function generateImage(prompt: string, aspectRatio: AspectRatio, referenceImage?: string | null): Promise<{url: string, base64: string}> {
   if (!API_KEY) {
     throw new Error("Chave de API não configurada. Verifique o arquivo services/geminiService.ts");
@@ -37,7 +46,7 @@ export async function generateImage(prompt: string, aspectRatio: AspectRatio, re
     parts.push({
       inlineData: {
         data: cleanBase64(referenceImage),
-        mimeType: 'image/png'
+        mimeType: getMimeType(referenceImage) // Detecta o tipo correto (jpeg, png, webp)
       }
     });
   }
@@ -69,7 +78,12 @@ export async function generateImage(prompt: string, aspectRatio: AspectRatio, re
     const imagePart = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
     
     if (!imagePart || !imagePart.inlineData) {
-      throw new Error("Falha na geração: Nenhuma imagem retornada.");
+      // Se não houver imagem, verificamos se há texto explicando o erro (ex: filtro de segurança)
+      const textPart = response.candidates?.[0]?.content?.parts.find(p => p.text);
+      if (textPart) {
+         throw new Error(`A API retornou texto em vez de imagem: ${textPart.text}`);
+      }
+      throw new Error("Falha na geração: Nenhuma imagem retornada. A imagem pode ter sido bloqueada por filtros de segurança.");
     }
 
     const base64 = imagePart.inlineData.data;
@@ -78,7 +92,7 @@ export async function generateImage(prompt: string, aspectRatio: AspectRatio, re
     return { url, base64 };
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    throw error;
+    throw new Error(error.message || "Erro desconhecido na API do Gemini.");
   }
 }
 
@@ -87,7 +101,7 @@ export async function editImage(originalBase64: string, editPrompt: string, aspe
     throw new Error("Chave de API não configurada. Verifique o arquivo services/geminiService.ts");
   }
 
-  // CORREÇÃO AQUI: Usando a constante API_KEY em vez da string repetida
+  // Usando a constante API_KEY
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   
   try {
@@ -98,7 +112,7 @@ export async function editImage(originalBase64: string, editPrompt: string, aspe
           {
             inlineData: {
               data: cleanBase64(originalBase64),
-              mimeType: 'image/png'
+              mimeType: 'image/png' // Aqui assumimos PNG pois a imagem gerada internamente é PNG
             }
           },
           {
@@ -119,6 +133,10 @@ export async function editImage(originalBase64: string, editPrompt: string, aspe
     const imagePart = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
     
     if (!imagePart || !imagePart.inlineData) {
+       const textPart = response.candidates?.[0]?.content?.parts.find(p => p.text);
+       if (textPart) {
+         throw new Error(`Erro na edição: ${textPart.text}`);
+       }
       throw new Error("Falha na edição: Nenhuma imagem retornada.");
     }
 
@@ -128,6 +146,6 @@ export async function editImage(originalBase64: string, editPrompt: string, aspe
     return { url, base64 };
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    throw error;
+    throw new Error(error.message || "Erro desconhecido ao editar imagem.");
   }
 }
