@@ -3,18 +3,6 @@ import { AspectRatio } from "../types";
 
 const MODEL_NAME = 'gemini-3-pro-image-preview';
 
-// ============================================================================
-// ONDE COLOCAR SUA CHAVE DE API (Billing API Key)
-// ============================================================================
-// Por padrão, o app tenta ler do ambiente (process.env.API_KEY).
-//
-// Para colocar sua chave MANUALMENTE, apague "process.env.API_KEY" e cole
-// sua chave entre aspas abaixo.
-//
-// Exemplo: const API_KEY = "AIzaSyD-sua-chave-aqui...";
-// ============================================================================
-const API_KEY = "AIzaSyB6poZ_TKzt3USPIX48wICRv42e3XEJrp8";
-
 // Função auxiliar para limpar o prefixo data:image/...;base64, se existir
 function cleanBase64(data: string): string {
   if (data.includes('base64,')) {
@@ -33,11 +21,8 @@ function getMimeType(data: string): string {
 }
 
 export async function generateImage(prompt: string, aspectRatio: AspectRatio, referenceImage?: string | null): Promise<{url: string, base64: string}> {
-  if (!API_KEY) {
-    throw new Error("Chave de API não configurada. Verifique o arquivo services/geminiService.ts");
-  }
-
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // A chave agora vem exclusivamente da variável de ambiente injetada pelo Vite/Vercel
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const parts: any[] = [];
 
@@ -97,12 +82,8 @@ export async function generateImage(prompt: string, aspectRatio: AspectRatio, re
 }
 
 export async function editImage(originalBase64: string, editPrompt: string, aspectRatio: AspectRatio): Promise<{url: string, base64: string}> {
-  if (!API_KEY) {
-    throw new Error("Chave de API não configurada. Verifique o arquivo services/geminiService.ts");
-  }
-
-  // Usando a constante API_KEY
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // A chave agora vem exclusivamente da variável de ambiente injetada pelo Vite/Vercel
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
