@@ -111,21 +111,23 @@ const App: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-6 mt-12">
         {/* Editor Section */}
-        <section className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-8 md:p-12 border border-slate-50 mb-16 relative overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center relative z-10">
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">O que vamos criar hoje?</h2>
-            <p className="text-slate-500 text-lg mb-12 font-medium">
-              Descreva sua ideia para uma capa e gere 3 versões únicas. <br/>Use uma referência para melhores resultados.
-            </p>
+        <section className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-6 md:p-12 border border-slate-50 mb-16 relative overflow-hidden">
+          <div className="max-w-4xl mx-auto relative z-10">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">O que vamos criar hoje?</h2>
+              <p className="text-slate-500 text-base md:text-lg font-medium">
+                Descreva sua ideia para uma capa e gere 3 versões únicas.
+              </p>
+            </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* Aspect Ratio Selector */}
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                 {(['1:1', '16:9', '9:16'] as AspectRatio[]).map((ratio) => (
                   <button
                     key={ratio}
                     onClick={() => setState(prev => ({ ...prev, selectedRatio: ratio }))}
-                    className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all border-2 ${
+                    className={`px-4 py-2 md:px-6 md:py-3 rounded-2xl font-bold text-xs md:text-sm transition-all border-2 ${
                       state.selectedRatio === ratio 
                       ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' 
                       : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
@@ -136,9 +138,22 @@ const App: React.FC = () => {
                 ))}
               </div>
 
-              {/* Prompt Input Container */}
-              <div className="relative group">
-                 <div className="absolute top-4 right-4 z-20 flex gap-2">
+              {/* Prompt Input Container - New Layout */}
+              <div className="bg-slate-50 border-2 border-slate-100 rounded-[2rem] overflow-hidden focus-within:border-blue-500 focus-within:bg-white transition-all shadow-inner flex flex-col">
+                
+                {/* 1. Text Area */}
+                <textarea
+                  value={state.mainPrompt}
+                  onChange={(e) => setState(prev => ({ ...prev, mainPrompt: e.target.value }))}
+                  placeholder="Ex: Uma capa vibrante para um canal de tecnologia sobre IA, fundo com neon azul e cérebro digital 3D..."
+                  className="w-full bg-transparent border-none p-6 md:p-8 text-lg md:text-xl font-medium outline-none h-40 md:h-48 resize-none placeholder-slate-300"
+                />
+
+                {/* 2. Toolbar / Actions Area */}
+                <div className="bg-slate-100/50 p-4 border-t border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                  
+                  {/* Reference Image Controls */}
+                  <div className="flex-shrink-0">
                     <input 
                       type="file" 
                       ref={fileInputRef}
@@ -146,56 +161,63 @@ const App: React.FC = () => {
                       accept="image/*"
                       className="hidden"
                     />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur hover:bg-white text-slate-600 hover:text-blue-600 rounded-xl text-sm font-bold shadow-sm border border-slate-200 transition-all"
-                      title="Anexar imagem de referência"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                      </svg>
-                      {state.referenceImage ? 'Trocar Referência' : 'Anexar Referência'}
-                    </button>
-                 </div>
-
-                <textarea
-                  value={state.mainPrompt}
-                  onChange={(e) => setState(prev => ({ ...prev, mainPrompt: e.target.value }))}
-                  placeholder="Ex: Uma capa vibrante para um canal de tecnologia sobre IA, fundo com neon azul e cérebro digital 3D..."
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] p-8 pt-16 text-lg md:text-xl font-medium focus:bg-white focus:border-blue-500 outline-none transition-all h-56 resize-none shadow-inner placeholder-slate-300"
-                />
-
-                {/* Reference Image Preview */}
-                {state.referenceImage && (
-                  <div className="absolute top-16 right-8 w-24 h-24 rounded-xl overflow-hidden border-2 border-white shadow-lg group-hover:scale-105 transition-transform">
-                     <img src={state.referenceImage} alt="Reference" className="w-full h-full object-cover" />
-                     <button 
-                        onClick={removeReferenceImage}
-                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white p-1 rounded-full transition-colors"
-                     >
-                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                     </button>
+                    
+                    {state.referenceImage ? (
+                      <div className="flex items-center gap-3 bg-white p-2 pr-4 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
+                        <div className="relative group w-12 h-12 flex-shrink-0">
+                          <img 
+                            src={state.referenceImage} 
+                            alt="Reference" 
+                            className="w-full h-full object-cover rounded-lg" 
+                          />
+                        </div>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Referência Ativa</span>
+                          <span className="text-[10px] text-slate-400 truncate">Imagem carregada</span>
+                        </div>
+                        <button
+                          onClick={removeReferenceImage}
+                          className="text-slate-400 hover:text-red-500 p-2 transition-colors"
+                          title="Remover referência"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-xl text-sm font-bold shadow-sm border border-slate-200 transition-all w-full md:w-auto"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Anexar Referência
+                      </button>
+                    )}
                   </div>
-                )}
 
-                <button
-                  onClick={handleGenerateAll}
-                  disabled={state.isGeneratingAll || !state.mainPrompt.trim()}
-                  className={`absolute bottom-6 right-6 py-4 px-10 rounded-2xl font-black text-white transition-all transform active:scale-95 shadow-xl ${
-                    state.isGeneratingAll || !state.mainPrompt.trim() 
-                    ? 'bg-slate-300 cursor-not-allowed shadow-none' 
-                    : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200 hover:-translate-y-1'
-                  }`}
-                >
-                  {state.isGeneratingAll ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Processando...
-                    </div>
-                  ) : (
-                    'Gerar 3 Opções'
-                  )}
-                </button>
+                  {/* Generate Button */}
+                  <button
+                    onClick={handleGenerateAll}
+                    disabled={state.isGeneratingAll || !state.mainPrompt.trim()}
+                    className={`py-3 md:py-4 px-8 md:px-10 rounded-xl font-black text-white text-sm md:text-base transition-all transform active:scale-95 shadow-lg w-full md:w-auto ${
+                      state.isGeneratingAll || !state.mainPrompt.trim() 
+                      ? 'bg-slate-300 cursor-not-allowed shadow-none' 
+                      : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200 hover:-translate-y-1'
+                    }`}
+                  >
+                    {state.isGeneratingAll ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processando...
+                      </div>
+                    ) : (
+                      'Gerar 3 Opções'
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
